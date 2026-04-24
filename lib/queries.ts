@@ -47,7 +47,10 @@ export async function getRecipeBySlug(slug: string): Promise<RecipeWithRelations
     .eq('published', true)
     .single()
 
-  if (error) return null
+  if (error) {
+    if (error.code === 'PGRST116') return null // no rows found
+    throw error
+  }
 
   const recipe = data as RecipeWithRelations
   recipe.ingredients.sort((a, b) => a.sort_order - b.sort_order)
@@ -77,7 +80,10 @@ export async function getRecipeByIdAdmin(id: string): Promise<RecipeWithRelation
     `)
     .eq('id', id)
     .single()
-  if (error) return null
+  if (error) {
+    if (error.code === 'PGRST116') return null // no rows found
+    throw error
+  }
   const recipe = data as RecipeWithRelations
   recipe.ingredients.sort((a, b) => a.sort_order - b.sort_order)
   recipe.steps.sort((a, b) => a.sort_order - b.sort_order)
