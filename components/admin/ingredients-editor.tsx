@@ -1,6 +1,6 @@
 'use client'
 
-import { DndContext, closestCenter } from '@dnd-kit/core'
+import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, useSortable, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
@@ -88,9 +88,9 @@ export function IngredientsEditor({ ingredients, onChange }: Props) {
     onChange(ingredients.map((i) => i._key === key ? { ...i, [field]: value } : i))
   }
 
-  function handleDragEnd(event: any) {
+  function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
-    if (active.id !== over?.id) {
+    if (over && active.id !== over.id) {
       const oldIndex = ingredients.findIndex((i) => i._key === active.id)
       const newIndex = ingredients.findIndex((i) => i._key === over.id)
       onChange(arrayMove(ingredients, oldIndex, newIndex))

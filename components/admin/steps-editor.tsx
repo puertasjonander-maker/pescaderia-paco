@@ -1,6 +1,6 @@
 'use client'
 
-import { DndContext, closestCenter } from '@dnd-kit/core'
+import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, useSortable, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
@@ -115,9 +115,9 @@ export function StepsEditor({ steps, ingredientOptions, onChange }: Props) {
     }))
   }
 
-  function handleDragEnd(event: any) {
+  function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
-    if (active.id !== over?.id) {
+    if (over && active.id !== over.id) {
       const oldIndex = steps.findIndex((s) => s._key === active.id)
       const newIndex = steps.findIndex((s) => s._key === over.id)
       onChange(arrayMove(steps, oldIndex, newIndex))

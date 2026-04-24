@@ -239,6 +239,7 @@ export function RecipeForm({ categories, recipe }: Props) {
             type="button"
             onClick={handleImportTikTok}
             disabled={importing || !tiktokUrl}
+            aria-label={importing ? 'Importando...' : 'Importar vídeo de TikTok'}
             className="bg-primary text-white text-sm font-bold px-4 py-2 rounded-xl disabled:opacity-50"
           >
             {importing ? '...' : '→'}
@@ -330,6 +331,8 @@ export function RecipeForm({ categories, recipe }: Props) {
         <button
           type="button"
           onClick={() => setPublished(!published)}
+          role="switch"
+          aria-checked={published}
           className={`w-12 h-6 rounded-full transition-colors relative ${published ? 'bg-primary' : 'bg-surface-alt'}`}
         >
           <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform mx-0.5 ${published ? 'translate-x-6' : 'translate-x-0'}`} />
