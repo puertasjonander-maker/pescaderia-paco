@@ -22,6 +22,7 @@ export interface Recipe {
   prep_time: number | null
   cook_time: number | null
   servings: number | null
+  main_fish: string | null
   published: boolean
   created_at: string
   updated_at: string

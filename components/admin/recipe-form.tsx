@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { IngredientsEditor, type EditorIngredient } from './ingredients-editor'
 import { StepsEditor, type EditorStep } from './steps-editor'
 import type { Category, RecipeWithRelations } from '@/lib/supabase/types'
+import { FISH_CATALOG } from '@/lib/fish-catalog'
 
 // Untyped Supabase client helper to work around strict Database generic constraints
 // when Insert/Update types conflict with supabase-js v2 overloads
@@ -41,6 +42,7 @@ export function RecipeForm({ categories, recipe }: Props) {
   const [cookTime, setCookTime] = useState(recipe?.cook_time?.toString() ?? '')
   const [servings, setServings] = useState(recipe?.servings?.toString() ?? '')
   const [published, setPublished] = useState(recipe?.published ?? false)
+  const [mainFish, setMainFish] = useState(recipe?.main_fish ?? '')
 
   const [ingredients, setIngredients] = useState<EditorIngredient[]>(
     recipe?.ingredients.map((i) => ({
@@ -115,6 +117,7 @@ export function RecipeForm({ categories, recipe }: Props) {
         prep_time: number | null
         cook_time: number | null
         servings: number | null
+        main_fish: string | null
         published: boolean
       } = {
         title,
@@ -128,6 +131,7 @@ export function RecipeForm({ categories, recipe }: Props) {
         prep_time: prepTime ? parseInt(prepTime) : null,
         cook_time: cookTime ? parseInt(cookTime) : null,
         servings: servings ? parseInt(servings) : null,
+        main_fish: mainFish || null,
         published,
       }
 
@@ -311,6 +315,17 @@ export function RecipeForm({ categories, recipe }: Props) {
             <option value="difícil">Difícil</option>
           </select>
         </div>
+      </div>
+
+      {/* Main fish */}
+      <div>
+        <label className="block text-xs font-bold text-text-secondary uppercase mb-1">Pescado principal</label>
+        <select value={mainFish} onChange={(e) => setMainFish(e.target.value)} className="w-full bg-surface-alt text-white text-sm rounded-xl px-3 py-2 focus:outline-none">
+          <option value="">— Sin especificar —</option>
+          {FISH_CATALOG.map((f) => (
+            <option key={f.id} value={f.id}>{f.emoji} {f.name}</option>
+          ))}
+        </select>
       </div>
 
       {/* Ingredients */}

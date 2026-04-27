@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import { getPublishedRecipes, getCategories } from '@/lib/queries'
 import { RecipeCard } from '@/components/recipe-card'
+import { FISH_CATALOG } from '@/lib/fish-catalog'
 
 export const revalidate = 60
 
@@ -12,6 +13,12 @@ export default async function HomePage() {
   ])
 
   const featured = recipes.slice(0, 12)
+
+  // Unique fish ids that have at least one published recipe
+  const fishIdsWithRecipes = Array.from(
+    new Set(recipes.map((r) => r.main_fish).filter((f): f is string => f !== null))
+  )
+  const fishEntries = FISH_CATALOG.filter((f) => fishIdsWithRecipes.includes(f.id))
 
   return (
     <main className="min-h-screen">
@@ -37,6 +44,27 @@ export default async function HomePage() {
           · Málaga
         </p>
       </section>
+
+      {/* Fish picker — ¿Qué compraste hoy? */}
+      {fishEntries.length > 0 && (
+        <section className="px-4 mb-6">
+          <p className="text-xs font-bold tracking-widest uppercase text-text-secondary mb-3">
+            ¿Qué compraste hoy?
+          </p>
+          <div className="-mx-4 px-4 flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {fishEntries.map((fish) => (
+              <Link
+                key={fish.id}
+                href={`/recetas?pez=${fish.id}`}
+                className="flex-none flex items-center gap-2 px-4 py-3 rounded-2xl bg-surface-alt text-text-secondary hover:text-white transition-colors"
+              >
+                <span className="text-lg">{fish.emoji}</span>
+                <span className="text-sm font-bold whitespace-nowrap">{fish.name}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Category pills */}
       <section className="px-4 mb-6">

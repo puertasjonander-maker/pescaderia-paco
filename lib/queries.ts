@@ -11,7 +11,7 @@ export async function getCategories(): Promise<Category[]> {
   return data
 }
 
-export async function getPublishedRecipes(categorySlug?: string): Promise<Recipe[]> {
+export async function getPublishedRecipes(categorySlug?: string, fishId?: string): Promise<Recipe[]> {
   const supabase = await createClient()
   let query = supabase
     .from('recipes')
@@ -26,6 +26,10 @@ export async function getPublishedRecipes(categorySlug?: string): Promise<Recipe
       .eq('slug', categorySlug)
       .single()
     if (category) query = query.eq('category_id', (category as { id: string }).id)
+  }
+
+  if (fishId && fishId !== 'todos') {
+    query = query.eq('main_fish', fishId)
   }
 
   const { data, error } = await query
