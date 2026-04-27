@@ -1,7 +1,7 @@
 import { getCategories } from '@/lib/queries'
-import { RecipeForm } from '@/components/admin/recipe-form'
+import { NuevaRecetaShell } from '@/components/admin/nueva-receta-shell'
 
 export default async function NewRecipePage() {
   const categories = await getCategories()
-  return <RecipeForm categories={categories} />
+  return <NuevaRecetaShell categories={categories} />
 }

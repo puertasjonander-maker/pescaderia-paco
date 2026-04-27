@@ -1,11 +1,12 @@
 'use client'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { IngredientsEditor, type EditorIngredient } from './ingredients-editor'
 import { StepsEditor, type EditorStep } from './steps-editor'
 import type { Category, RecipeWithRelations } from '@/lib/supabase/types'
 import { FISH_CATALOG } from '@/lib/fish-catalog'
+import type { RecipeDraft } from './ai-recipe-creator'
 
 // Untyped Supabase client helper to work around strict Database generic constraints
 // when Insert/Update types conflict with supabase-js v2 overloads
@@ -15,6 +16,8 @@ type AnySupabase = any
 interface Props {
   categories: Category[]
   recipe?: RecipeWithRelations
+  initialData?: RecipeDraft
+  aiSlot?: React.ReactNode
 }
 
 function generateSlug(text: string): string {
@@ -27,24 +30,37 @@ function generateSlug(text: string): string {
     .slice(0, 80)
 }
 
-export function RecipeForm({ categories, recipe }: Props) {
+export function RecipeForm({ categories, recipe, initialData, aiSlot }: Props) {
   const router = useRouter()
   const isEdit = !!recipe
   const supabase = createClient()
 
-  const [title, setTitle] = useState(recipe?.title ?? '')
-  const [description, setDescription] = useState(recipe?.description ?? '')
+  const [title, setTitle] = useState(recipe?.title ?? initialData?.title ?? '')
+  const [description, setDescription] = useState(recipe?.description ?? initialData?.description ?? '')
   const [tiktokUrl, setTiktokUrl] = useState(recipe?.tiktok_url ?? '')
   const [tiktokEmbed, setTiktokEmbed] = useState(recipe?.tiktok_embed ?? '')
-  const [categoryId, setCategoryId] = useState(recipe?.category_id ?? '')
-  const [difficulty, setDifficulty] = useState<string>(recipe?.difficulty ?? '')
-  const [prepTime, setPrepTime] = useState(recipe?.prep_time?.toString() ?? '')
-  const [cookTime, setCookTime] = useState(recipe?.cook_time?.toString() ?? '')
-  const [servings, setServings] = useState(recipe?.servings?.toString() ?? '')
+  const [categoryId, setCategoryId] = useState(
+    recipe?.category_id ??
+    (initialData?.category_slug
+      ? (categories.find((c) => c.slug === initialData.category_slug)?.id ?? '')
+      : '')
+  )
+  const [difficulty, setDifficulty] = useState<string>(recipe?.difficulty ?? initialData?.difficulty ?? '')
+  const [prepTime, setPrepTime] = useState(recipe?.prep_time?.toString() ?? initialData?.prep_time?.toString() ?? '')
+  const [cookTime, setCookTime] = useState(recipe?.cook_time?.toString() ?? initialData?.cook_time?.toString() ?? '')
+  const [servings, setServings] = useState(recipe?.servings?.toString() ?? initialData?.servings?.toString() ?? '')
   const [published, setPublished] = useState(recipe?.published ?? false)
-  const [mainFish, setMainFish] = useState(recipe?.main_fish ?? '')
+  const [mainFish, setMainFish] = useState(recipe?.main_fish ?? initialData?.main_fish ?? '')
 
   const [ingredients, setIngredients] = useState<EditorIngredient[]>(
+    initialData?.ingredients.map((i) => ({
+      _key: crypto.randomUUID(),
+      name: i.name,
+      quantity: i.quantity,
+      unit: i.unit,
+      optional: i.optional,
+      sort_order: 0,
+    })) ??
     recipe?.ingredients.map((i) => ({
       _key: i.id,
       id: i.id,
@@ -57,6 +73,12 @@ export function RecipeForm({ categories, recipe }: Props) {
   )
 
   const [steps, setSteps] = useState<EditorStep[]>(
+    initialData?.steps.map((s, idx) => ({
+      _key: crypto.randomUUID(),
+      text: s.text,
+      sort_order: idx,
+      _ingredientIds: [],
+    })) ??
     recipe?.steps.map((s) => ({
       _key: s.id,
       id: s.id,
@@ -226,6 +248,8 @@ export function RecipeForm({ categories, recipe }: Props) {
         <a href="/admin" className="text-text-secondary text-sm">← Admin</a>
         <h1 className="text-2xl font-black">{isEdit ? 'Editar receta' : 'Nueva receta'}</h1>
       </div>
+
+      {aiSlot}
 
       {/* TikTok URL */}
       <div>
