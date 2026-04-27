@@ -10,15 +10,19 @@ interface Props {
 
 export function NuevaRecetaShell({ categories }: Props) {
   const [draft, setDraft] = useState<RecipeDraft | null>(null)
+  const [draftVersion, setDraftVersion] = useState(0)
 
   function handleDraftReceived(d: RecipeDraft) {
     setDraft(d)
+    setDraftVersion((v) => v + 1)
   }
 
   return (
     <>
-      {/* AiRecipeCreator + banner injected inside the form's container via slot prop pattern */}
+      {/* key changes every time a new draft arrives, forcing RecipeForm to remount
+          so all useState initialisers re-run with the fresh initialData */}
       <RecipeForm
+        key={draftVersion}
         categories={categories}
         initialData={draft ?? undefined}
         aiSlot={
