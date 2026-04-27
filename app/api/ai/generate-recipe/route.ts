@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateObject } from 'ai'
-import { createAnthropic } from '@ai-sdk/anthropic'
+import { createOpenAI } from '@ai-sdk/openai'
 import { z } from 'zod'
 
 const RecipeSchema = z.object({
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
+  const apiKey = process.env.OPENROUTER_API_KEY
   if (!apiKey) {
     return NextResponse.json({ error: 'API key not configured' }, { status: 503 })
   }
@@ -102,7 +102,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing source or content' }, { status: 400 })
   }
 
-  const anthropic = createAnthropic({ apiKey })
+  const openrouter = createOpenAI({
+    baseURL: 'https://openrouter.ai/api/v1',
+    apiKey,
+  })
 
   let userPrompt: string
 
@@ -136,7 +139,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await generateObject({
-      model: anthropic('claude-3-5-haiku-20241022'),
+      model: openrouter('anthropic/claude-3.5-haiku'),
       schema: RecipeSchema,
       system: SYSTEM_PROMPT,
       prompt: userPrompt,

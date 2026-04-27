@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a mobile-first Next.js 15 web app for Pescadería Paco (Málaga) with a recipe catalogue powered by TikTok videos and an interactive step-by-step cooking mode, managed via an admin panel.
+**Goal:** Build a mobile-first Next.js 16.x web app for Pescadería Paco (Málaga) with a recipe catalogue powered by TikTok videos and an interactive step-by-step cooking mode, managed via an admin panel.
 
-**Architecture:** Next.js 15 App Router with React Server Components for public pages (fast, SEO-friendly) and Client Components only where interactivity is needed (cooking mode, admin forms). Supabase handles the database (PostgreSQL + RLS), auth (magic link), and image storage.
+**Architecture:** Next.js 16.x App Router with React Server Components for public pages (fast, SEO-friendly) and Client Components only where interactivity is needed (cooking mode, admin forms). Supabase handles the database (PostgreSQL + RLS), auth (magic link), and image storage.
 
-**Tech Stack:** Next.js 15, TypeScript, Tailwind CSS v4, Supabase (PostgreSQL + Auth + Storage), Vercel deploy, dnd-kit (drag-and-drop in admin), Inter font (Google Fonts).
+**Tech Stack:** Next.js 16.x, TypeScript, Tailwind CSS v4 (CSS-first config via `@theme` in globals.css — no tailwind.config.ts), Supabase (PostgreSQL + Auth + Storage), Vercel deploy, dnd-kit (drag-and-drop in admin), Inter font (Google Fonts).
 
 **Spec:** `docs/superpowers/specs/2026-04-24-pescaderia-paco-design.md`
 
@@ -120,48 +120,34 @@ gh repo create pescaderia-paco --public --source=. --remote=origin --push
 
 ### Task 2: Configure design tokens in Tailwind
 
+**Note:** Tailwind v4 uses CSS-first configuration — there is NO `tailwind.config.ts`. All design tokens go into `app/globals.css` using the `@theme` block.
+
 **Files:**
-- Modify: `tailwind.config.ts`
-- Modify: `app/globals.css`
+- Modify: `app/globals.css` (add `@theme` tokens + Inter font import)
+- Modify: `app/layout.tsx`
 
-- [ ] **Step 1: Update tailwind.config.ts with design tokens**
+- [ ] **Step 1: Update globals.css with design tokens (Tailwind v4 @theme)**
 
-```typescript
-// tailwind.config.ts
-import type { Config } from 'tailwindcss'
-
-const config: Config = {
-  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
-  theme: {
-    extend: {
-      colors: {
-        primary: '#E8350A',
-        background: '#0A0A0A',
-        surface: '#141414',
-        'surface-alt': '#1A1A1A',
-        'text-primary': '#FFFFFF',
-        'text-secondary': '#AAAAAA',
-        'accent-green': '#1A4A3A',
-      },
-      fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-      },
-    },
-  },
-  plugins: [],
-}
-
-export default config
-```
-
-- [ ] **Step 2: Update globals.css**
-
-Replace the contents of `app/globals.css`:
+Replace the entire contents of `app/globals.css`:
 ```css
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-* {
+@theme {
+  --color-primary: #E8350A;
+  --color-background: #0A0A0A;
+  --color-surface: #141414;
+  --color-surface-alt: #1A1A1A;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #AAAAAA;
+  --color-accent-green: #1A4A3A;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -171,14 +157,17 @@ html {
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
   background-color: #0A0A0A;
   color: #FFFFFF;
   min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
 }
 ```
 
-- [ ] **Step 3: Update app/layout.tsx**
+With Tailwind v4, `@theme { --color-primary: ... }` makes `bg-primary`, `text-primary`, `border-primary` etc. available as utility classes automatically.
+
+- [ ] **Step 2: Update app/layout.tsx**
 
 ```tsx
 // app/layout.tsx
